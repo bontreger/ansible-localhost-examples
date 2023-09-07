@@ -1,0 +1,51 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Create a file on the AAP controller for demonstration
+      file:
+        path: /tmp/testfile.txt
+        owner: root
+        group: root
+        mode: '0644'
+        state: touch
+      delegate_to: localhost
+    
+    - name: Read the file stats
+      stat:
+        path: /tmp/testfile.txt
+      register: p
+
+    - name: Print stat
+      debug:
+        msg: "{{ p }}"
+
+    - name: Pause for ls
+      pause:
+        seconds: 5
+
+    - name: Attempt to remove the file using delegate_to
+      file:
+        path: /tmp/testfile.txt
+        state: absent
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Read the file stats
+      stat:
+        path: /tmp/testfile.txt
+      register: p
+
+    - name: Print stat
+      debug:
+        msg: "{{ p }}"
+
+    - name: Pause for ls
+      pause:
+        seconds: 5
+
+    - name: Attempt to remove the file without localhost
+      file:
+        path: /tmp/testfile.txt
+        state: absent
+      ignore_errors: true

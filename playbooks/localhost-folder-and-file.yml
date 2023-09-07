@@ -1,0 +1,132 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Create a folder on the AAP controller for demonstration
+      file:
+        path: /tmp/testfolder/
+        owner: root
+        group: root
+        mode: '0644'
+        state: directory
+
+    - name: Create a file on the AAP controller for demonstration
+      file:
+        path: /tmp/testfolder/testfile.txt
+        owner: root
+        group: root
+        mode: '0644'
+        state: touch    
+
+    - name: Create a folder with localhost on the AAP controller for demonstration
+      file:
+        path: /tmp/testlocalhostfolder/
+        owner: root
+        group: root
+        mode: '0644'
+        state: directory
+      delegate_to: localhost
+
+    - name: Create a file on the AAP controller for demonstration
+      file:
+        path: /tmp/testlocalhostfolder/testfile.txt
+        owner: root
+        group: root
+        mode: '0644'
+        state: touch
+      delegate_to: localhost
+
+    - name: Read the file stats
+      stat:
+        path: /tmp/testfolder/testfile.txt
+      register: p
+
+    - name: Print stat
+      debug:
+        msg: "{{ p }}"
+
+    - name: Read the file stats
+      stat:
+        path: /tmp/testlocalhostfolder/testfile.txt
+      register: p
+
+    - name: Print stat
+      debug:
+        msg: "{{ p }}"
+
+    - name: Pause for ls
+      pause:
+        seconds: 5
+
+    - name: Attempt to remove the regular file using delegate_to
+      file:
+        path: /tmp/testfolder/testfile.txt
+        state: absent
+      delegate_to: localhost
+      ignore_errors: true
+      
+    - name: Attempt to remove the localhost file using delegate_to
+      file:
+        path: /tmp/testlocalhostfolder/testfile.txt
+        state: absent
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Attempt to remove the regular folder using delegate_to
+      file:
+        path: /tmp/testfolder
+        state: absent
+      delegate_to: localhost
+      ignore_errors: true
+      
+    - name: Attempt to remove the localhost folder using delegate_to
+      file:
+        path: /tmp/testlocalhostfolder
+        state: absent
+      delegate_to: localhost
+      ignore_errors: true    
+
+    - name: Read the file stats
+      stat:
+        path: /tmp/testfolder/testfile.txt
+      register: p
+
+    - name: Print stat
+      debug:
+        msg: "{{ p }}"
+
+    - name: Read the file stats
+      stat:
+        path: /tmp/testlocalhostfolder/testfile.txt
+      register: p
+
+    - name: Print stat
+      debug:
+        msg: "{{ p }}"
+
+    - name: Pause for ls
+      pause:
+        seconds: 5
+
+    - name: Attempt to remove the file without localhost
+      file:
+        path: /tmp/testfolder/testfile.txt
+        state: absent
+      ignore_errors: true
+
+    - name: Attempt to remove the file without localhost
+      file:
+        path: /tmp/testlocalhostfolder/testfile.txt
+        state: absent
+      #ignore_errors: true
+    - name: Attempt to remove the regular folder without localhost
+      file:
+        path: /tmp/testfolder
+        state: absent
+      #ignore_errors: true
+      
+    - name: Attempt to remove the localhost folder without localhost
+      file:
+        path: /tmp/testlocalhostfolder
+        state: absent
+      #ignore_errors: true   
